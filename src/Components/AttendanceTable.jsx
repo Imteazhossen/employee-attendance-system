@@ -8,43 +8,65 @@ const AttendanceTable = () => {
     const month = now.getMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    const initialEmployees = [
-        { id: 1, name: "John Smith", salaryRange: "$1,245" },
-        { id: 2, name: "Sarah Johnson", salaryRange: "$890" },
-        { id: 3, name: "Mike Davis", salaryRange: "$2,520" },
-        { id: 4, name: "Emily Wilson", salaryRange: "$495" },
-        { id: 5, name: "David Brown", salaryRange: "$1,340" },
-    ];
+    // 1. Move initialEmployees into State so we can push data into it
+    const [employees, setEmployees] = useState([
+        { id: 1, name: "John Smith", salaryRange: "$1,245", absent: [], late: [], present: [] },
+        { id: 2, name: "Sarah Johnson", salaryRange: "$890", absent: [], late: [], present: [] },
+        { id: 3, name: "Mike Davis", salaryRange: "$2,520", absent: [], late: [], present: [] },
+        { id: 4, name: "Emily Wilson", salaryRange: "$495", absent: [], late: [], present: [] },
+        { id: 5, name: "David Brown", salaryRange: "$1,340", absent: [], late: [], present: [] },
+    ]);
 
     const [searchTerm, setSearchTerm] = useState("");
-    
-    // Initialize with dynamic daysInMonth
+
+    // Initialize numeric state for UI tracking
     const [attendance, setAttendance] = useState(
-        initialEmployees.reduce((acc, emp) => {
+        employees.reduce((acc, emp) => {
             acc[emp.id] = Array(daysInMonth).fill(0);
             return acc;
         }, {})
     );
 
     const toggleAttendance = (employeeId, dateIndex, empName) => {
+        // A. Update Numeric State for UI toggle
         const currentStates = [...attendance[employeeId]];
         const nextState = (currentStates[dateIndex] + 1) % 4;
         currentStates[dateIndex] = nextState;
 
         setAttendance({ ...attendance, [employeeId]: currentStates });
 
-        if (nextState !== 0) {
-            const statusLabels = ["Initial", "Present", "Absent", "Late"];
-            // Construct exact date for storage logic
-            const specificDate = new Date(year, month, dateIndex + 1);
-            console.log(`Stored: ${empName} | Date: ${specificDate.toDateString()} | Status: ${statusLabels[nextState]}`);
-        }
+        // B. Update Employee Object Arrays (present, absent, late)
+        const dateString = new Date(year, month, dateIndex + 1).toLocaleDateString();
 
-        console.log(setAttendance);
+        setEmployees(prevEmployees => 
+            prevEmployees.map(emp => {
+                if (emp.id === employeeId) {
+                    // Remove the date from all arrays first to prevent duplicates/conflicts
+                    const newPresent = emp.present.filter(d => d !== dateString);
+                    const newAbsent = emp.absent.filter(d => d !== dateString);
+                    const newLate = emp.late.filter(d => d !== dateString);
+
+                    // Push to the correct array based on nextState
+                    if (nextState === 1) newPresent.push(dateString);
+                    if (nextState === 2) newAbsent.push(dateString);
+                    if (nextState === 3) newLate.push(dateString);
+
+                    return { 
+                        ...emp, 
+                        present: newPresent, 
+                        absent: newAbsent, 
+                        late: newLate 
+                    };
+                }
+                return emp;
+            })
+        );
+
+        // Logic check: Log the updated employee object to console
+        console.log(`Updated Data for ${empName}:`, nextState === 0 ? "Reset" : `Added to status ${nextState}`);
     };
 
-
-    const filteredEmployees = initialEmployees.filter(emp =>
+    const filteredEmployees = employees.filter(emp =>
         emp.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -56,6 +78,7 @@ const AttendanceTable = () => {
             default: return "bg-[#262626] border-neutral-700 text-transparent hover:border-neutral-500";
         }
     };
+    console.log(employees);
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white p-6 font-sans">
@@ -69,7 +92,10 @@ const AttendanceTable = () => {
                         {now.toLocaleString('default', { month: 'long' })} {year}
                     </p>
                 </div>
-                <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all font-medium">
+                <button 
+                    onClick={() => console.log("Final Employee Data:", employees)}
+                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all font-medium"
+                >
                     <Download size={18} /> Export Report
                 </button>
             </div>
