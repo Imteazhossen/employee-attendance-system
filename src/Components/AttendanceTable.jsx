@@ -39,7 +39,10 @@ const AttendanceTable = () => {
             const specificDate = new Date(year, month, dateIndex + 1);
             console.log(`Stored: ${empName} | Date: ${specificDate.toDateString()} | Status: ${statusLabels[nextState]}`);
         }
+
+        console.log(setAttendance);
     };
+
 
     const filteredEmployees = initialEmployees.filter(emp =>
         emp.name.toLowerCase().includes(searchTerm.toLowerCase())
