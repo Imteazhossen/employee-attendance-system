@@ -1,9 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, X, Search, Download, Users, Clock } from "lucide-react";
 
 const AttendanceTable = () => {
-    // 1. Expanded Employee Data
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
     const initialEmployees = [
         { id: 1, name: "John Smith", salaryRange: "$1,245" },
         { id: 2, name: "Sarah Johnson", salaryRange: "$890" },
@@ -12,17 +16,16 @@ const AttendanceTable = () => {
         { id: 5, name: "David Brown", salaryRange: "$1,340" },
     ];
 
-    // 2. States
     const [searchTerm, setSearchTerm] = useState("");
-    // We map by ID to ensure attendance stays with the correct person when filtering
+    
+    // Initialize with dynamic daysInMonth
     const [attendance, setAttendance] = useState(
         initialEmployees.reduce((acc, emp) => {
-            acc[emp.id] = Array(31).fill(0);
+            acc[emp.id] = Array(daysInMonth).fill(0);
             return acc;
         }, {})
     );
 
-    // 3. Logic: 0 -> 1 (Pres) -> 2 (Abs) -> 3 (Late) -> 0
     const toggleAttendance = (employeeId, dateIndex, empName) => {
         const currentStates = [...attendance[employeeId]];
         const nextState = (currentStates[dateIndex] + 1) % 4;
@@ -30,15 +33,14 @@ const AttendanceTable = () => {
 
         setAttendance({ ...attendance, [employeeId]: currentStates });
 
-        // Storage Simulation
         if (nextState !== 0) {
             const statusLabels = ["Initial", "Present", "Absent", "Late"];
-            const timestamp = new Date().toLocaleDateString();
-            console.log(`Stored: ${empName} | Day: ${dateIndex + 1} | Status: ${statusLabels[nextState]} | Recorded: ${timestamp}`);
+            // Construct exact date for storage logic
+            const specificDate = new Date(year, month, dateIndex + 1);
+            console.log(`Stored: ${empName} | Date: ${specificDate.toDateString()} | Status: ${statusLabels[nextState]}`);
         }
     };
 
-    // 4. Search Filter
     const filteredEmployees = initialEmployees.filter(emp =>
         emp.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -60,7 +62,9 @@ const AttendanceTable = () => {
                     <h1 className="text-2xl font-semibold flex items-center gap-2">
                         <Users className="text-red-600" /> Attendance Management
                     </h1>
-                    <p className="text-gray-400 text-sm">Real-time tracking and search</p>
+                    <p className="text-gray-400 text-sm uppercase tracking-widest">
+                        {now.toLocaleString('default', { month: 'long' })} {year}
+                    </p>
                 </div>
                 <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all font-medium">
                     <Download size={18} /> Export Report
@@ -87,9 +91,9 @@ const AttendanceTable = () => {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="border-b border-neutral-800 bg-[#1a1a1a]">
-                                <th className="p-4 text-gray-400 font-medium text-sm sticky left-0 bg-[#1a1a1a] z-10">Employee Name</th>
-                                {Array.from({ length: 31 }, (_, i) => (
-                                    <th key={i} className="p-2 text-gray-400 font-medium text-xs text-center border-l border-neutral-800/50">{i + 1}</th>
+                                <th className="p-4 text-gray-400 font-medium text-sm sticky left-0 bg-[#1a1a1a] z-10 border-r border-neutral-800">Employee Name</th>
+                                {Array.from({ length: daysInMonth }, (_, i) => (
+                                    <th key={i} className="p-2 text-gray-400 font-medium text-xs text-center border-l border-neutral-800/50 ">{i + 1}</th>
                                 ))}
                                 <th className="p-4 text-gray-400 font-medium text-sm text-right">Salary</th>
                             </tr>
@@ -125,7 +129,7 @@ const AttendanceTable = () => {
                                             </div>
                                         </td>
                                     ))}
-                                    <td className="p-4 text-right font-mono text-gray-400 text-sm">
+                                    <td className="p-4 text-right font-mono text-gray-400 text-sm whitespace-nowrap">
                                         {employee.salaryRange}
                                     </td>
                                 </tr>
