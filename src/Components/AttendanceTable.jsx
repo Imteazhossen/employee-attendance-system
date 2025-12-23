@@ -120,11 +120,11 @@ const AttendanceTable = () => {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="border-b border-neutral-800 bg-[#1a1a1a]">
-                                <th className="p-4 text-gray-400 font-medium text-sm sticky left-0 bg-[#1a1a1a] z-10 border-r border-neutral-800">Employee Name</th>
+                                <th className="p-4 text-white font-medium text-sm sticky left-0 bg-[#1a1a1a] z-10 border-r border-neutral-800">Employee Name</th>
                                 {Array.from({ length: daysInMonth }, (_, i) => (
-                                    <th key={i} className="p-2 text-gray-400 font-medium text-xs text-center border-l border-neutral-800/50 ">{i + 1}</th>
+                                    <th key={i} className="p-2 text-white font-medium text-xs text-center border-l border-neutral-800/50 ">{i + 1}</th>
                                 ))}
-                                <th className="p-4 text-gray-400 font-medium text-sm text-right">Salary</th>
+                                <th className="p-4 text-white font-medium text-sm text-right">Salary</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -158,7 +158,7 @@ const AttendanceTable = () => {
                                             </div>
                                         </td>
                                     ))}
-                                    <td className="p-4 text-right font-mono text-gray-400 text-sm whitespace-nowrap">
+                                    <td className="p-4 text-right font-mono text-white text-sm whitespace-nowrap">
                                         {employee.salaryRange}
                                     </td>
                                 </tr>
